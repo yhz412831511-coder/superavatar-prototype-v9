@@ -1,0 +1,311 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
+@import './fiscal.css';
+@import './visual-theme.css';
+@import './visual-refinement.css';
+@import './brainstorm.css';
+@import './party.css';
+@import './professional-intelligence.css';
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-ui);
+  --font-mono: var(--font-code);
+  --font-heading: var(--font-ui);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.35);
+  --radius-2xl: calc(var(--radius) * 1.8);
+}
+
+:root {
+  --font-ui:
+    'SF Pro Text', 'PingFang SC', 'Microsoft YaHei', 'Noto Sans CJK SC', Arial,
+    sans-serif;
+  --font-code: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+  --background: #f6f9fe;
+  --foreground: #10213d;
+  --card: #ffffff;
+  --card-foreground: #10213d;
+  --popover: #ffffff;
+  --popover-foreground: #10213d;
+  --primary: #075dcc;
+  --primary-foreground: #ffffff;
+  --secondary: #e5efff;
+  --secondary-foreground: #075dcc;
+  --muted: #edf4fd;
+  --muted-foreground: #51647f;
+  --accent: #e5efff;
+  --accent-foreground: #075dcc;
+  --destructive: #b42318;
+  --border: #d7e1ef;
+  --input: #a9bcd4;
+  --ring: #075dcc;
+  --chart-1: #075dcc;
+  --chart-2: #6941c6;
+  --chart-3: #076c48;
+  --chart-4: #965000;
+  --chart-5: #b42318;
+  --radius: 0.7rem;
+  --sidebar: #edf4fd;
+  --sidebar-foreground: #10213d;
+  --sidebar-primary: #075dcc;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #cfe0ff;
+  --sidebar-accent-foreground: #075dcc;
+  --sidebar-border: #c4d4e9;
+  --sidebar-ring: #075dcc;
+}
+
+.dark {
+  --background: #111827;
+  --foreground: #f3f4f6;
+  --card: #182131;
+  --card-foreground: #f3f4f6;
+  --popover: #182131;
+  --popover-foreground: #f3f4f6;
+  --primary: #78a0ff;
+  --primary-foreground: #0d1b38;
+  --secondary: #26344e;
+  --secondary-foreground: #dce6ff;
+  --muted: #222c3d;
+  --muted-foreground: #a8b2c3;
+  --accent: #26344e;
+  --accent-foreground: #dce6ff;
+  --destructive: #f0817b;
+  --border: #303b4d;
+  --input: #3b4658;
+  --ring: #78a0ff;
+  --sidebar: #151e2c;
+  --sidebar-foreground: #d5dbea;
+  --sidebar-primary: #78a0ff;
+  --sidebar-primary-foreground: #0d1b38;
+  --sidebar-accent: #26344e;
+  --sidebar-accent-foreground: #eef3ff;
+  --sidebar-border: #303b4d;
+  --sidebar-ring: #78a0ff;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  html {
+    @apply font-sans;
+    background: var(--background);
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    min-width: 0;
+    margin: 0;
+    font-family: var(--font-ui);
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  button,
+  textarea {
+    font: inherit;
+  }
+
+  button {
+    cursor: pointer;
+  }
+
+  :where(button, a, input, textarea, select, [tabindex]):focus-visible {
+    outline: 2px solid rgba(75, 111, 214, 0.82);
+    outline-offset: 2px;
+  }
+}
+
+.sidebar-surface {
+  background:
+    radial-gradient(circle at 0 0, rgba(44, 90, 179, 0.19), transparent 34%),
+    linear-gradient(180deg, #111c30 0%, #0b1220 58%, #090f1b 100%);
+  box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.025);
+}
+
+.brand-mark {
+  background: linear-gradient(145deg, #2f72ff 0%, #315cca 54%, #6a61df 100%);
+  box-shadow:
+    0 6px 16px rgba(28, 84, 210, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+
+.ai-mark {
+  background: linear-gradient(145deg, #1f5eff 0%, #5f68d7 100%);
+  box-shadow: 0 7px 20px rgba(57, 78, 196, 0.2);
+}
+
+.workbench-grid {
+  background-color: #f5f7fb;
+  background-image:
+    linear-gradient(rgba(95, 118, 159, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(95, 118, 159, 0.035) 1px, transparent 1px),
+    radial-gradient(
+      circle at 68% 28%,
+      rgba(81, 107, 218, 0.08),
+      transparent 28%
+    );
+  background-size:
+    28px 28px,
+    28px 28px,
+    auto;
+}
+
+.environment-panel {
+  position: relative;
+}
+
+.environment-panel::before {
+  position: absolute;
+  top: 0;
+  right: 24px;
+  left: 24px;
+  height: 1px;
+  content: '';
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(63, 99, 220, 0.75),
+    transparent
+  );
+}
+
+.run-summary-card {
+  position: relative;
+}
+
+.run-summary-card::before {
+  position: absolute;
+  top: 0;
+  right: 22px;
+  left: 22px;
+  height: 1px;
+  content: '';
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(65, 104, 218, 0.62),
+    transparent
+  );
+}
+
+.timeline-icon.normal {
+  border: 1px solid #dce4f5;
+  background: #eef3ff;
+  color: #4c69c6;
+}
+
+.timeline-icon.warning {
+  border: 1px solid #f0dab5;
+  background: #fff7e8;
+  color: #b76e00;
+}
+
+.timeline-icon.success {
+  border: 1px solid #cfe8db;
+  background: #eff9f3;
+  color: #17875d;
+}
+
+.event-card {
+  border: 1px solid #e0e6ef;
+  border-radius: 12px;
+  background: #ffffff;
+  padding: 14px;
+  box-shadow: 0 5px 18px rgba(16, 24, 40, 0.035);
+}
+
+.event-card.warning {
+  border-color: #efd8ae;
+  background: linear-gradient(180deg, #fffdf8 0%, #fffaf0 100%);
+}
+
+.event-card.success {
+  border-color: #cfe5d9;
+  background: linear-gradient(180deg, #ffffff 0%, #f7fcf9 100%);
+}
+
+.document-preview {
+  background-image: linear-gradient(
+    rgba(92, 111, 142, 0.025) 1px,
+    transparent 1px
+  );
+  background-size: 100% 22px;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #d0d5dd transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+/* Independent product palettes also apply to portal menus and dialogs. */
+body:has(.admin-shell),
+body:has(.mem-app) {
+  color-scheme: light;
+  --background: #f6f9fe;
+  --foreground: #10213d;
+  --card: #fff;
+  --card-foreground: #10213d;
+  --popover: #fff;
+  --popover-foreground: #10213d;
+  --primary: #075dcc;
+  --primary-foreground: #fff;
+  --secondary: #e5efff;
+  --secondary-foreground: #075dcc;
+  --muted: #edf4fd;
+  --muted-foreground: #51647f;
+  --accent: #e5efff;
+  --accent-foreground: #075dcc;
+  --border: #d7e1ef;
+  --input: #a9bcd4;
+  --ring: #075dcc;
+}

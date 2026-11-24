@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>组织智能体 · 超级分身 · v9</title>
+<link rel="icon" type="image/svg+xml" href="./favicon.svg">
+</head>
+<body>
+<div class="win">
+  <nav class="edge-rail left-edge" id="rail" aria-label="模块入口"></nav>
+  <div class="app-main">
+    <header class="tb topbar">
+      <div class="brand-lockup"><strong>组织智能体</strong><div class="crumb" id="crumb"></div></div>
+      <div class="top-actions">
+        <button class="btn icon-only header-panel" id="header-panel" data-a="sidebarToggle" aria-controls="module-nav" aria-label="展开模块侧栏" hidden></button>
+        <button class="btn sm top-search" id="global-search" data-a="globalFind">⌕ 搜索 <kbd>⌘ K</kbd></button>
+        <button class="btn sm" id="head-admin" data-a="go" data-x="admin">管理端</button>
+        <button class="btn sm" data-a="guideOn">演示路线</button>
+      </div>
+    </header>
+    <div class="module-stage" id="module-stage">
+      <aside id="module-nav" class="module-nav" hidden></aside>
+      <main class="page" id="page"></main>
+      <div id="sa-workbench" class="sa-scope" hidden></div>
+      <div id="sa-settings" class="sa-scope" hidden></div>
+    </div>
+  </div>
+</div>
+<div class="mask" id="mask"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div id="demo-panel"></div>
+<div id="sa-portal" class="sa-scope" hidden></div>
+
+
+<script type="module" src="/src/main.ts"></script>
+</body>
+</html>

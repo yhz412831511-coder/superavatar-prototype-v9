@@ -1,0 +1,167 @@
+/*
+ * v9 宿主风格映射：把源工作台的语义变量对齐到 v8 外壳（组织智能体）。
+ * 只调视觉变量与少量布局，不改组件结构与交互。本文件经 postcss-scope 处理，
+ * 选择器中的 html[...] 会落到 .sa-scope 节点上。
+ */
+
+/* 容器：源是整页应用（100dvh），在宿主里填满工作台区域。 */
+.fw-app.fw-app {
+  height: 100%;
+  min-height: 0;
+}
+
+/* 浅色：v8 的冷蓝色系，稳重克制。 */
+html[data-theme='light'] {
+  --ui-surface: #ffffff;
+  --ui-canvas: #f0f4fc;
+  --ui-side-surface: #edf4ff;
+  --ui-raised: #ffffff;
+  --ui-hover: #e6effd;
+  --ui-bubble: #eaf1ff;
+  --ui-text: #1c2026;
+  --ui-muted: #5b636e;
+  --ui-border: #d8e4f7;
+  --ui-border-strong: #b0c8ee;
+  --ui-brand: #2455a0;
+  --ui-brand-hover: #1d4787;
+  --ui-on-brand: #ffffff;
+  --ui-brand-soft: #dfebff;
+  --ui-brand-border: #caddfb;
+  --ui-shadow: 0 10px 30px #163b7814;
+  --ui-overlay: #0c204659;
+  --ui-workspace-center: #f7f9fe;
+  --ui-workspace-side: #edf4ff;
+  --ui-workspace-raised: #ffffff;
+  --ui-workspace-hover: #e2edff;
+  --ui-workspace-bubble: #eaf1ff;
+  --ui-workspace-text: #1c2026;
+  --ui-workspace-muted: #5b636e;
+  --ui-workspace-border: #d0def4;
+  --ui-workspace-border-strong: #a9c0e6;
+  --ui-workspace-brand: #2455a0;
+  --ui-workspace-brand-hover: #1d4787;
+  --ui-workspace-brand-soft: #dfebff;
+  --ui-workspace-brand-border: #caddfb;
+  /* 源的深色导航在宿主里改为浅色（宿主左侧已有深色图标栏，避免两条深色竖栏并列）。 */
+  --ui-nav-surface: #edf4ff;
+  --ui-nav-raised: #f6f9ff;
+  --ui-nav-hover: #e0ecff;
+  --ui-nav-active: #dfebff;
+  --ui-nav-text: #1c2026;
+  --ui-nav-muted: #526c92;
+  --ui-nav-border: #ceddf4;
+  --ui-nav-brand: #174ba9;
+  --ui-dock-surface: #edf4ff;
+  --ui-dock-raised: #f6f9ff;
+  --ui-dock-hover: #e0ecff;
+  --ui-dock-active: #dfebff;
+  --ui-dock-text: #1c2026;
+  --ui-dock-muted: #526c92;
+  --ui-dock-border: #ceddf4;
+  --ui-dock-brand: #174ba9;
+}
+
+/* 字号与尺寸：对齐 v8（正文 13.5px、紧凑工具栏、模块栏 226px）。 */
+html[data-theme] {
+  --ui-font-body: 14px;
+  --ui-font-control: 13px;
+  --ui-font-meta: 12px;
+  --ui-font-page-title: 20px;
+  --ui-font-section-title: 16px;
+  --ui-font-subtitle: 14px;
+  --ui-sidebar-width: 226px;
+  --ui-topbar-height: 44px;
+  --font-ui: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+}
+html[data-font-size='large'] {
+  --ui-font-body: 16px;
+  --ui-font-control: 15px;
+  --ui-font-meta: 13px;
+  --ui-font-page-title: 22px;
+  --ui-font-section-title: 18px;
+  --ui-font-subtitle: 16px;
+}
+
+/* 浅色侧栏：与 v8 模块栏同款，选中项用浅蓝底深蓝字。 */
+html[data-theme='light'] .fw-app.fw-app .fw-sidebar {
+  --ui-border-strong: #b0c8ee;
+  --ui-brand-hover: #174ba9;
+  --ui-brand-border: #caddfb;
+  box-shadow: none;
+}
+html[data-theme='light']
+  .fw-app.fw-app
+  .fw-sidebar
+  :is(
+    nav button.active,
+    .fw-folder.active,
+    .fw-task-list button.active,
+    .fw-project-row.active .fw-folder
+  ) {
+  color: #174ba9;
+  background: #dfebff;
+  font-weight: 600;
+}
+html[data-theme='light'] .fw-app.fw-app .fw-sidebar .fw-project-row.active {
+  color: #174ba9;
+}
+html[data-theme='light']
+  .fw-app.fw-app
+  .fw-sidebar
+  :is(.fw-brand strong, .fw-account-name strong) {
+  color: #163678;
+}
+html[data-theme='light']
+  .fw-app.fw-app
+  .fw-sidebar
+  :is(nav button.active svg, .fw-task-list button.active svg, .fw-project-row.active svg) {
+  color: #174ba9;
+}
+
+/* 窄屏：工作台在宿主里比视口少一条图标栏宽度，输入器工具栏允许换行，快捷入口改为三列。 */
+@media (max-width: 640px) {
+  .fw-app .task-composer__toolbar {
+    flex-wrap: wrap;
+    row-gap: 4px;
+  }
+  .fw-app .task-composer__toolbar-left {
+    flex-wrap: wrap;
+    min-width: 0;
+    row-gap: 4px;
+  }
+  .fw-app .fw-home-shortcuts {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* 轻应用页 */
+.la-page { padding: 28px 36px; overflow: auto; height: 100%; }
+.la-head { display: flex; gap: 24px; align-items: flex-start; justify-content: space-between; max-width: 880px; }
+.la-head h1 { margin: 0 0 6px; font-size: var(--ui-font-page-title); }
+.la-head p { margin: 0; color: var(--ui-muted); max-width: 640px; }
+.la-list { display: grid; gap: 14px; margin-top: 22px; max-width: 880px; }
+.la-card { border: 1px solid var(--ui-border); border-radius: 12px; background: var(--ui-surface); padding: 18px 20px; }
+.la-card-top { display: flex; align-items: center; gap: 12px; }
+.la-icon { width: 40px; height: 40px; border-radius: 10px; display: grid; place-items: center; background: var(--ui-brand-soft); color: var(--ui-brand); }
+.la-title { flex: 1; display: grid; }
+.la-title strong { font-size: 15px; }
+.la-title small { color: var(--ui-muted); font-size: 12px; }
+.la-state { font-size: 12px; border: 1px solid var(--ui-border); border-radius: 999px; padding: 2px 10px; color: var(--ui-muted); }
+.la-state.on { color: #1f6b3f; background: #e8f6ee; border-color: #b9e0c8; }
+.la-summary { margin: 12px 0; line-height: 1.7; }
+.la-meta { display: grid; grid-template-columns: 96px 1fr; gap: 6px 12px; margin: 0 0 14px; font-size: 13px; }
+.la-meta dt { color: var(--ui-muted); display: flex; gap: 5px; align-items: center; }
+.la-meta dd { margin: 0; }
+.la-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.la-actions small { color: var(--ui-muted); font-size: 12px; }
+.la-btn { display: inline-flex; align-items: center; gap: 5px; border: 1px solid var(--ui-border-strong); background: var(--ui-surface); border-radius: 8px; padding: 5px 12px; font-size: 13px; cursor: pointer; white-space: nowrap; }
+.la-btn:hover { background: var(--ui-hover); }
+.la-btn.primary { background: var(--ui-brand); border-color: var(--ui-brand); color: var(--ui-on-brand); }
+.la-btn.primary:hover { background: var(--ui-brand-hover); }
+
+/* 全局设置页中承载的工作台个人设置 */
+.fw-app.fw-global-settings { height: 100%; }
+.fw-app.fw-global-settings .fw-main { flex: 1; min-width: 0; overflow: auto; }
+.la-connector { display: inline-flex; align-items: center; gap: 4px; margin-top: 4px; width: fit-content; font-size: 11.5px; color: var(--ui-brand); background: var(--ui-brand-soft); border: 1px solid var(--ui-brand-border); border-radius: 999px; padding: 1px 8px; }
+.la-link { margin-left: 8px; border: 0; background: none; color: var(--ui-brand); font-size: 12.5px; cursor: pointer; padding: 0; }
+.la-link:hover { text-decoration: underline; }

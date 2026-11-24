@@ -1,0 +1,256 @@
+// v9：界面框架用词按名词解释调整（任务→会话、对话→会话），本文件中对应的文案断言同步更新。
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import {
+  initialWorkspace,
+  taskFor,
+  workspaceReducer,
+} from '../app/fiscal-domain.ts';
+import { fiscalAgent } from '../app/fiscal-catalog.ts';
+import { taskProgress } from '../app/task-progress.ts';
+
+const now = Date.parse('2026-09-08T09:00:00+08:00');
+const initial = () => initialWorkspace(now);
+
+test('历史业务任务展示完整业务步骤且全部完成', () => {
+  const s = initial();
+  const maintenance = s.flows['maintenance-history'];
+  const payment = s.flows['payment-history'];
+  const maintenanceProgress = taskProgress(
+    taskFor(s, maintenance.id),
+    maintenance,
+  );
+  const paymentProgress = taskProgress(taskFor(s, payment.id), payment);
+  assert.equal(maintenanceProgress.length, 7);
+  assert.equal(paymentProgress.length, 6);
+  assert.ok(maintenanceProgress.every((step) => step.status === 'completed'));
+  assert.ok(paymentProgress.every((step) => step.status === 'completed'));
+  assert.deepEqual(
+    maintenanceProgress.map((step) => step.title),
+    [
+      '读取并确认交办要求',
+      '获取运维申报办理指引',
+      '建立申报并完善基础信息',
+      '关联并同步运维资产',
+      '整理并上传申报材料',
+      '获取费用估算并完成提交',
+      '决定是否创建审核反馈追踪',
+    ],
+  );
+});
+
+test('支付审查阶段只保留一个执行中步骤', () => {
+  let s = workspaceReducer(initial(), { type: 'replay', kind: 'payment' });
+  let f = s.flows['replay-payment'];
+  let progress = taskProgress(taskFor(s, f.id), f);
+  assert.deepEqual(progress.map((step) => step.status), [
+    'in_progress',
+    'not_started',
+    'not_started',
+    'not_started',
+    'not_started',
+    'not_started',
+  ]);
+  s = workspaceReducer(s, {
+    type: 'command',
+    taskId: f.id,
+    cmd: 'read-payments',
+  });
+  f = s.flows['replay-payment'];
+  progress = taskProgress(taskFor(s, f.id), f);
+  assert.deepEqual(progress.slice(0, 3).map((step) => step.status), [
+    'completed',
+    'in_progress',
+    'not_started',
+  ]);
+  assert.equal(
+    progress.filter((step) => step.status === 'in_progress').length,
+    1,
+  );
+});
+
+test('等待、异常和暂停仍是执行中并显示原因', () => {
+  const s = workspaceReducer(initial(), { type: 'replay', kind: 'payment' });
+  const task = taskFor(s, 'replay-payment');
+  const waiting = structuredClone(s.flows['replay-payment']);
+  waiting.status = '等待本人确认';
+  assert.equal(taskProgress(task, waiting)[0].statusDetail, '等待本人确认');
+
+  const failed = structuredClone(waiting);
+  failed.status = '执行失败';
+  assert.equal(
+    taskProgress(task, failed)[0].statusDetail,
+    '执行失败，等待重试',
+  );
+
+  const stopped = structuredClone(waiting);
+  stopped.stopped = true;
+  assert.equal(taskProgress(task, stopped)[0].statusDetail, '会话已暂停');
+});
+
+test('审核反馈使用五项业务步骤并停留在材料完善', () => {
+  const s = initial();
+  const task = taskFor(s, 'maintenance-history');
+  const flow = {
+    ...structuredClone(s.flows['maintenance-history']),
+    id: task.id,
+    kind: 'feedback',
+    stage: 'feedback',
+    status: '等待本人处理',
+    historical: false,
+  };
+  const progress = taskProgress(task, flow);
+  assert.deepEqual(progress.map((step) => step.status), [
+    'completed',
+    'completed',
+    'completed',
+    'in_progress',
+    'not_started',
+  ]);
+  assert.equal(progress[3].statusDetail, '等待本人处理');
+});
+
+test('专业咨询完成后五项步骤全部完成', () => {
+  const s = workspaceReducer(initial(), {
+    type: 'new-task',
+    id: 'consult-progress',
+    text: '请说明财政支付审查的办理要求',
+    agentId: fiscalAgent,
+    refs: [],
+  });
+  const flow = s.flows['consult-progress'];
+  const progress = taskProgress(taskFor(s, flow.id), flow);
+  assert.equal(progress.length, 5);
+  assert.ok(progress.every((step) => step.status === 'completed'));
+});
+
+test('普通新任务生成五项业务进度', () => {
+  const s = workspaceReducer(initial(), {
+    type: 'new-task',
+    id: 'generic-progress',
+    text: '整理本周工作简报',
+    refs: [],
+  });
+  const progress = taskProgress(taskFor(s, 'generic-progress'));
+  assert.equal(progress.length, 5);
+  assert.deepEqual(progress.map((step) => step.status), [
+    'completed',
+    'in_progress',
+    'not_started',
+    'not_started',
+    'not_started',
+  ]);
+  assert.match(progress[0].title, /工作简报/);
+});
+
+test('两条新增历史任务使用故事进度，培训续办不改变历史完成状态', () => {
+  let s = initial();
+  for (const [id, expected] of [
+    ['policy-consultation-history', ['核对企业实际情况', '比对支持与材料', '给出窗口办理建议']],
+    ['training-speech-history', ['核对旧稿与案例沿革', '校验案例状态与当前口径', '形成并修订送审工作稿']],
+  ]) {
+    const progress = taskProgress(taskFor(s, id));
+    assert.deepEqual(progress.map((step) => step.title), expected);
+    assert.ok(progress.every((step) => step.status === 'completed'));
+  }
+  s = workspaceReducer(s, {
+    type: 'say',
+    taskId: 'training-speech-history',
+    text: '补充案例沿革和待核来源，形成送审工作稿。',
+  });
+  assert.ok(s.storyRounds['training-speech-history']);
+  assert.ok(
+    taskProgress(taskFor(s, 'training-speech-history')).every(
+      (step) => step.status === 'completed',
+    ),
+  );
+});
+
+test('任务进度只保留业务步骤并实现三态视觉', () => {
+  const component = readFileSync(
+    new URL('../app/fiscal-components.tsx', import.meta.url),
+    'utf8',
+  );
+  const css = readFileSync(
+    new URL('../app/visual-refinement.css', import.meta.url),
+    'utf8',
+  );
+  const monitor = component.slice(
+    component.indexOf('export function Monitor'),
+    component.indexOf('export function CatalogModal'),
+  );
+  assert.doesNotMatch(
+    monitor,
+    /查看此前|提交来源|定位当前待办|安全与授权|fw-monitor-attention/,
+  );
+  assert.match(monitor, /会话进度/);
+  assert.match(monitor, /相关记忆/);
+  assert.doesNotMatch(
+    monitor,
+    /本次工作依据|本次留下的经验|参考了 .*项记忆|有界记忆证据包/,
+  );
+  assert.doesNotMatch(
+    component,
+    /可用于本次工作的记忆|授权后，相关记忆会用于这次工作|用于本次任务/,
+  );
+  assert.match(monitor, /storyMemoryIds\.has\(m\.id\)/);
+  assert.match(monitor, /onMemory\(m\.id\)/);
+  assert.match(monitor, /本次未关联可下钻的记忆/);
+  assert.match(css, /text-decoration:\s*line-through/);
+  assert.match(css, /fw-task-progress-spin/);
+  assert.match(css, /data-reduced-motion='true'.*fw-task-progress/s);
+});
+
+test('任务概览使用限定在右侧工作区的连续清单视觉', () => {
+  const css = readFileSync(
+    new URL('../app/visual-refinement.css', import.meta.url),
+    'utf8',
+  );
+  const workspaceCss = readFileSync(
+    new URL('../app/task-workspace.css', import.meta.url),
+    'utf8',
+  );
+
+  assert.match(css, /\.tw-dock \.fw-monitor\s*\{/);
+  assert.match(
+    css,
+    /\.tw-dock \.fw-monitor\s*\{[^}]*background:\s*var\(--ui-side\)/s,
+  );
+  assert.match(css, /summary::after/);
+  assert.match(css, /border-bottom:\s*1px dashed/);
+  assert.match(css, /\.tw-dock \.fw-monitor \.fw-file-icon/);
+  assert.match(workspaceCss, /\.tw-header\s*\{[^}]*min-height:48px/);
+  assert.match(workspaceCss, /\.tw-head-actions button\s*\{[^}]*width:32px/);
+});
+
+test('任务概览桌面端采用组内紧凑的纵向节奏', () => {
+  const css = readFileSync(
+    new URL('../app/visual-refinement.css', import.meta.url),
+    'utf8',
+  );
+  const dockStyles = css.slice(
+    css.indexOf('/* QoderWork-inspired task overview'),
+  );
+
+  assert.match(
+    dockStyles,
+    /\.tw-dock \.fw-monitor > details > summary\s*\{[^}]*min-height:\s*38px/s,
+  );
+  assert.match(
+    dockStyles,
+    /\.tw-dock \.fw-task-progress li\s*\{[^}]*min-height:\s*26px[^}]*margin:\s*0[^}]*gap:\s*8px[^}]*padding:\s*2px 0[^}]*line-height:\s*1\.35/s,
+  );
+  assert.match(
+    dockStyles,
+    /\.tw-dock \.fw-task-progress-icon\s*\{[^}]*width:\s*16px[^}]*height:\s*16px/s,
+  );
+  assert.match(
+    dockStyles,
+    /\.tw-dock \.fw-monitor \.fw-artifact-row,[\s\S]*?min-height:\s*36px[^}]*padding:\s*4px 8px/s,
+  );
+  assert.match(
+    dockStyles,
+    /@media \(max-width:\s*700px\)[\s\S]*?\.tw-dock \.fw-monitor > details > summary,[\s\S]*?min-height:\s*44px/s,
+  );
+});
